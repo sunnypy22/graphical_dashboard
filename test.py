@@ -1,256 +1,139 @@
 import pandas as pd
 import datetime as dt
 import xml.etree.ElementTree as ET
+
 xl_workbook = pd.ExcelFile('D:\\Logix\\Graphical Dashboard\\task-legal_sheet.xlsx')
 
-# Sheet1 Data
+#  Parameters
 
-sheet1 = xl_workbook.parse("sheet1-t_legal_status")
+# sh1 = "sheet1-t_legal_status"
+# sh2 = "sheet2- Abandoned"
+# sh3 = "sheet3-Double"
+# sh4 = "Sheet4 ifi-integrated-content"
+#
+# sh1_pb = "publication_id"
+# sh4_pb = "publication_id"
+#
+# sh1_content = "content"
+# sh2_content = "Event-title"
+# sh3_content = "Event-title"
+# sh4_content = "content"
 
-legal_status_id = sheet1['legal_status_id'].tolist()
-publication_id = sheet1['publication_id'].tolist()
-modified_load_id = sheet1['modified_load_id'].tolist()
-status = sheet1['status'].tolist()
-content = sheet1['content'].tolist()
 
-# Sheet2 Data
+# database connection
+def db_conn():
+    import psycopg2
+    conn = psycopg2.connect(dbname="mgpznpjc", user='mgpznpjc', password='pEuAWZjcHkTB86lDNLvMwTJKS-2l2aOw',
+                            host='satao.db.elephantsql.com', port='5432')
+    return conn
 
-sheet2 = xl_workbook.parse("sheet2- Abandoned")
-Event_title = sheet2['Event-title'].tolist()
 
-# Sheet3 Data
+# Read Excel File
+def read_sheet(sheet_name):
+    sheet = xl_workbook.parse(sheet_name)
+    return sheet
 
-sheet3 = xl_workbook.parse("sheet3-Double")
-sh3_title = sheet3['Event-title'].tolist()
 
-# Sheet4 Data
+# Read publication id from excel
+def read_pb_id(sht_name, pb_id):
+    sheet1 = read_sheet(sht_name)
+    pb_id = sheet1[pb_id].tolist()
+    return pb_id
 
-sheet4 = xl_workbook.parse("Sheet4 ifi-integrated-content")
-sh4_title = sheet4['content'].tolist()
-sh4_publication_id = sheet4['publication_id'].tolist()
 
-# Titles of sheet2
+# read title from excel
+def content(sht_name, content):
+    sheet1 = read_sheet(sht_name)
+    content = sheet1[content].tolist()
+    return content
+
+
+# Return key name from dictionary from related value
+def get_key(val, dict):
+    for key, value in dict.items():
+        if val == value:
+            return key
+
+    return "key doesn't exist"
+
+
 sheet2_list = []  # Title name from sheet2
+sheet3_list = []  # Title name from sheet3
+sht4_val = []  # Title name from sheet4
 
-for title in Event_title:
+for title in content("sheet2- Abandoned", "Event-title"):  # Titles of Sheet2
     sheet2_list.append(title)
 
-# Titles of Sheet3
-sheet3_list = []  # Title name from sheet3
-
-for title in sh3_title:
+for title in content("sheet3-Double", "Event-title"):  # Titles of Sheet3
     sheet3_list.append(title)
 
-    # Title Name
+for sht4_test_xml in range(len(content("Sheet4 ifi-integrated-content", "content"))):  # Titles of Sheet4
+    root4 = ET.fromstring(content("Sheet4 ifi-integrated-content", "content")[sht4_test_xml])
 
-COUNTRY_list = []
-for ttle in sh4_title:
-    if '<ifi-patent-status-description country="US">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="US">')
-        first_index = index + 44
-
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="AU">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="AU">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="CA">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="CA">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="JP">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="JP">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="ES">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="ES">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="DE">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="DE">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="FR">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="FR">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="GB">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="GB">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    # elif '<ifi-patent-status-description country="EP">' in ttle:
-    #     index = ttle.index('<ifi-patent-status-description country="EP">')
-    #     first_index = index + 44
-    #
-    #     end_index = ttle.index('</ifi-patent-status -description>')
-    #     final_val = ttle[first_index:end_index]
-    #     COUNTRY_list.append(final_val)
-    elif '<ifi-patent-status-description country="CN">' in ttle:
-        index = ttle.index('<ifi-patent-status-description country="CN">')
-        first_index = index + 44
-        end_index = ttle.index('</ifi-patent-status-description>')
-        final_val = ttle[first_index:end_index]
-        COUNTRY_list.append(final_val)
-    else:
-        COUNTRY_list.append('Nothing')
-
-sht_4_data = []
-for data in range(len(sh4_publication_id)):
-    sht_4_data.append({
-        'publication_id': sh4_publication_id[data],
-        'title_value': COUNTRY_list[data]
-    })
-
-title_check = []  # Add to Status Field
-for title_eve in content:
-    if "<event-title>" in title_eve:
-        index = title_eve.index('<event-title>')
-        first_index = index + 13
-        end_index = title_eve.index('</event-title>')
-        final_title = title_eve[first_index:end_index]
-        if final_title in sheet2_list:
-            title_check.append('Abandoned')
-        elif final_title in sheet3_list:
-            title_check.append('Double')
-        else:
-            title_check.append('v')
-    else:
-        title_check.append('Null')
-
-date_field = []
-for date in content:
-    index = date.index('date')
-    first_idex = index + 6
-    last_index = index + 14
-    date_append = date[first_idex:first_idex + 4] + "-" + date[first_idex + 4:first_idex + 6] + "-" + date[
-                                                                                                      first_idex + 6:first_idex + 8]
-    date_str = date[first_idex:last_index]
-    d = dt.datetime.strptime(date_append, "%Y-%m-%d")
-    d = d.date()
-    date_field.append(d)
-
-sorted_date = sorted(date_field)
-
-data = []
-for i in range(len(date_field)):
-    data.append(
-        {
-            'legal_status_id': legal_status_id[i],
-            'publication_id': publication_id[i],
-            'modified_load_id': modified_load_id[i],
-            'status': title_check[i],
-            'content': content[i],
-            'date': date_field[i]
-        }
-    )
-
-# print(data)
-data.sort(key=lambda x: x['date'])
-data = data[::-1]
-
-for i in data:
-    if i['status'] == "Null":
-        pb_id = i['publication_id']
-        for k in range(len(sht_4_data)):
-            if sht_4_data[k]['publication_id'] == pb_id:
-                i['status'] = sht_4_data[k]['title_value']
-
-import xml.etree.ElementTree as ET
-
-# date_list = []
-# for date in range(len(content)):
-#     root = ET.fromstring(content[date])
-#     date = []
-#     for child in root:
-#         date_str = child.attrib['date']
-#
-#         date.append({
-#             'date': date_str
-#         })
-#     date_list.append(date)
-
-id = []
-for test_xml in range(len(content)):
-    root = ET.fromstring(content[test_xml])
-    if "legal-status" in root.tag:
-        date = []
-        for child in root:
-            date_str = child.attrib['date']
-
-            date.append({
-                'date': date_str
+    for neighbor in root4.iter('ifi-integrated-content'):
+        for k in neighbor.iter('ifi-patent-status-description'):
+            sht4_val.append({
+                'value': k.text,
+                'pb': read_pb_id("Sheet4 ifi-integrated-content", "publication_id")[sht4_test_xml]
             })
-        title = []
-        for neighbor in root.iter('event-title'):
-            append_title = neighbor.text
-            if append_title in sheet2_list:
-                status = "Abandoneone"
-            elif append_title in sheet3_list:
-                status = "Double"
-            else:
-                status = "v"
-            title.append(
-                {
-                    "title": append_title,
-                    "status": status,
-                    "date": date
-                }
-            )
-        id.append(
-            {
-                'pb_id': publication_id[test_xml],
-                'title': title,
-            }
-        )
+            break
+
 date_title = []
-for test_xml in range(len(content)):
-    root = ET.fromstring(content[test_xml])
+pub_dt = {}  # Store date and title in dict format
+for test_xml in range(len(content("sheet1-t_legal_status", "content"))):
+    root = ET.fromstring(content("sheet1-t_legal_status", "content")[test_xml])
     ttl_dt = []
+
     for neighbor in root.iter('legal-event'):
 
         str_date = neighbor.attrib['date']
         date_append = str_date[0:4] + "-" + str_date[4:6] + "-" + str_date[6:8]
         d = dt.datetime.strptime(date_append, "%Y-%m-%d")
         d = d.date()
-        # print(d)
+
+        date_title = []
 
         for k in neighbor.iter('event-title'):
-            ttl_dt.append({
-                'date': neighbor.attrib['date'],
-                'title': k.text
-            })
-    date_title.append(ttl_dt)
-        # print(neighbor.attrib['date'])
+            ttl_dt.append({'date': d, 'title': k.text, })
+            date_title.append(ttl_dt)
 
+        pub_dt[read_pb_id("sheet1-t_legal_status", "publication_id")[test_xml]] = date_title
 
-# Date Format (String to Date)
+# Update date_title for Date Format (String to Date)
 
-for view in date_title:
-    view[0]['date'] = view[0]['date'][0:4] + "-" + view[0]['date'][4:6] + "-" + view[0]['date'][6:8]
-    db = view[0]['date']
-    date_format = dt.datetime.strptime(db, "%Y-%m-%d")
-    finl_dt_date = date_format.date()
-    view[0]['date'] = finl_dt_date
+for values in pub_dt.values():
+    values[0].sort(key=lambda x: x['date'])
+    values[0] = values[0][::-1]
 
-for test_xml in range(len(content)):
-    root = ET.fromstring(content[test_xml])
-    ttl_dt = []
-    for neighbor in root.iter('legal-event'):
-        for k in neighbor.iter('event-title'):
-            print(k.tag)
+# Condition for data availability in sheet2, sheet3 and sheet4
+
+for j in pub_dt.values():
+    if j[0][0]['title'] in sheet2_list:
+        j[0].append({'status': "Abandoned"})
+
+    elif j[0][0]['title'] in sheet3_list:
+        j[0].append({'status': "Double"})
+
+    else:
+        pub_id = get_key(j, pub_dt)
+        for m in sht4_val:
+            z = m['pb']
+            if pub_id == z:
+                j[0].append({'status': m['value']})
+
+conn = db_conn()
+cursor = db_conn().cursor()
+for final_data in pub_dt.values():
+    fnl_data = final_data[0]
+    date = final_data[0][0]['date']
+    pub_id = get_key(final_data, pub_dt)
+    try:
+        sts = fnl_data[-1]['status']
+        cursor.execute("INSERT INTO test_task(Date,pub_id,status) VALUES(%s, %s, %s)", (date, pub_id, sts,))
+        conn.commit()
+    except:
+        sts = 'V'
+        cursor.execute("INSERT INTO test_task(Date,pub_id,status) VALUES(%s, %s, %s)", (date, pub_id, sts,))
+        conn.commit()
+cursor.close()
+conn.close()
